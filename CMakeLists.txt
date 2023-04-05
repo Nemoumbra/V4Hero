@@ -8,6 +8,37 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++20")
 add_definitions(-DPATAFOUR_VERSION="${CMAKE_PROJECT_VERSION}")
 
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${V4Hero_SOURCE_DIR}/bin/Debug)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${V4Hero_SOURCE_DIR}/bin/Release)
+
+add_custom_target(
+        FinalizeDebugBuild
+
+        COMMAND ${CMAKE_COMMAND} -E copy
+        ${PROJECT_SOURCE_DIR}/build/_deps/discord_game_sdk-src/lib/x86_64/discord_game_sdk.dll
+        ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}/discord_game_sdk.dll
+
+        COMMAND ${CMAKE_COMMAND} -E copy
+        ${PROJECT_SOURCE_DIR}/build/_deps/sfml-src/extlibs/bin/x64/openal32.dll
+        ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}/openal32.dll
+
+        COMMAND ${CMAKE_COMMAND} -E create_symlink ${PROJECT_SOURCE_DIR}/resources ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}/resources
+)
+
+add_custom_target(
+        FinalizeReleaseBuild
+
+        COMMAND ${CMAKE_COMMAND} -E copy
+        ${PROJECT_SOURCE_DIR}/build/_deps/discord_game_sdk-src/lib/x86_64/discord_game_sdk.dll
+        ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE}/discord_game_sdk.dll
+
+        COMMAND ${CMAKE_COMMAND} -E copy
+        ${PROJECT_SOURCE_DIR}/build/_deps/sfml-src/extlibs/bin/x64/openal32.dll
+        ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE}/openal32.dll
+
+        COMMAND ${CMAKE_COMMAND} -E create_symlink ${PROJECT_SOURCE_DIR}/resources ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE}/resources
+)
+
 set(SFML_STATIC_LIBRARIES TRUE)
 
 find_package(DiscordSDK 2.5.6 COMPONENTS x86_64 REQUIRED)
@@ -177,11 +208,3 @@ if (OS STREQUAL "Linux")
     find_package(X11 REQUIRED)
     target_link_libraries(V4Hero PRIVATE X11::X11)
 endif (OS STREQUAL "Linux")
-
-if (NOT (PROJECT_SOURCE_DIR STREQUAL PROJECT_BINARY_DIR))
-  add_custom_command(
-          TARGET V4Hero POST_BUILD
-          COMMAND ${CMAKE_COMMAND} -E create_symlink ${PROJECT_SOURCE_DIR}/resources ${PROJECT_BINARY_DIR}/resources
-          DEPENDS "${PROJECT_BINARY_DIR}/resources"
-  )
-endif()
